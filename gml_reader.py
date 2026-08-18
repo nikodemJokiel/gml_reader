@@ -176,8 +176,17 @@ def build_terc_dict(terc_path: str) -> dict:
             nazwa = (row.findtext("NAZWA") or "").strip()
             nazwa_dod = (row.findtext("NAZWA_DOD") or "").strip()
 
-            if not (woj and pow_ and gmi and rodz):
+            if not (woj and pow_):
                 continue
+                
+            if not (gmi and rodz):
+                # For cities on powiat rights, TERC often leaves GMI and RODZ empty, 
+                # but plots use 01 and 1 respectively.
+                if "na prawach powiatu" in nazwa_dod:
+                    gmi = "01"
+                    rodz = "1"
+                else:
+                    continue
 
             key = f"{woj}{pow_}{gmi}{rodz}"
             label = f"{nazwa} ({nazwa_dod})" if nazwa_dod else nazwa
@@ -521,6 +530,24 @@ def build_premises_dict(root: ET.Element, ns: dict) -> dict:
             if not gml_id:
                 continue
 
+            # Check for inline address (Poznań format)
+            inline_address = {}
+            addr_container = elem.find(f"{{{ns['rcn']}}}adresBudynkuZLokalem", ns)
+            if addr_container is not None:
+                inline_addr_elem = addr_container.find(f"{{{ns['rcn']}}}RCN_Adres", ns)
+                if inline_addr_elem is None:
+                    # Try without namespace (some files)
+                    for child in addr_container:
+                        if child.tag.endswith("}RCN_Adres") or child.tag == "RCN_Adres":
+                            inline_addr_elem = child
+                            break
+                if inline_addr_elem is not None:
+                    inline_address = {
+                        "locality": get_text(inline_addr_elem, f"{{{ns['rcn']}}}miejscowosc", ns),
+                        "street": get_text(inline_addr_elem, f"{{{ns['rcn']}}}ulica", ns),
+                        "number": get_text(inline_addr_elem, f"{{{ns['rcn']}}}numerPorzadkowy", ns),
+                    }
+
             premises[gml_id] = {
                 "premises_id": get_text(elem, f"{{{ns['rcn']}}}idLokalu", ns),
                 "function": get_text(elem, f"{{{ns['rcn']}}}funkcjaLokalu", ns),
@@ -530,6 +557,9 @@ def build_premises_dict(root: ET.Element, ns: dict) -> dict:
                 "floor": get_text(elem, f"{{{ns['rcn']}}}nrKondygnacji", ns),
                 "additional_info": get_text(elem, f"{{{ns['rcn']}}}dodatkoweInformacje", ns),
                 "address_href": get_href(elem, f"{{{ns['rcn']}}}adresBudynkuZLokalem", ns),
+                "inline_address": inline_address,
+                "premises_price": get_text(elem, f"{{{ns['rcn']}}}cenaLokaluBrutto", ns),
+                "premises_vat": get_text(elem, f"{{{ns['rcn']}}}kwotaPodatkuVAT", ns),
             }
 
     return premises
@@ -593,6 +623,7 @@ def collect_plot_data(property_hrefs: list, prop_dict: dict, plot_dict: dict,
     all_share_remarks = []
     all_property_types = []
     all_property_rights = []
+    all_property_prices = []
     total_area_sqm = 0
     area_valid = False
     fallback_price_sum = 0
@@ -618,8 +649,12 @@ def collect_plot_data(property_hrefs: list, prop_dict: dict, plot_dict: dict,
 
         # Check for fractional ownership
         is_fractional = share and share not in FULL_SHARES
-        if is_fractional:
-            all_share_remarks.append(f"Sprzedaz udzialu: {share}")
+
+        # Always record the share value for proper ordering
+        all_share_remarks.append(share if share else "1/1")
+
+        # Collect property-level price
+        all_property_prices.append(prop_price if prop_price else "")
 
         # Resolve all plots for this property
         for pl_href in prop_data.get("plot_hrefs", []):
@@ -678,6 +713,7 @@ def collect_plot_data(property_hrefs: list, prop_dict: dict, plot_dict: dict,
         "share_remarks": all_share_remarks,
         "property_types": all_property_types,
         "property_rights": all_property_rights,
+        "property_prices": all_property_prices,
         "total_area_sqm": total_area_sqm if area_valid else None,
         "fallback_price_sum": fallback_price_sum,
         "fallback_area_sum": fallback_area_sum,
@@ -697,6 +733,7 @@ def collect_building_data(property_hrefs: list, prop_dict: dict,
     all_building_streets = []
     all_building_info = []
     all_building_share_remarks = []
+    all_building_property_prices = []
 
     for prop_href in property_hrefs:
         prop_data = prop_dict.get(prop_href, {})
@@ -724,10 +761,9 @@ def collect_building_data(property_hrefs: list, prop_dict: dict,
             all_building_streets.append(bld_street)
             all_building_info.append(bld_info)
 
-            # Fractional share for this building's property
-            is_fractional = share and share not in FULL_SHARES
-            if is_fractional:
-                all_building_share_remarks.append(f"Sprzedaz udzialu: {share}")
+            # Always record the share value for proper ordering
+            all_building_share_remarks.append(share if share else "1/1")
+            all_building_property_prices.append(prop_data.get("property_price_gross", ""))
 
     return {
         "building_ids": all_building_ids,
@@ -737,6 +773,7 @@ def collect_building_data(property_hrefs: list, prop_dict: dict,
         "building_streets": all_building_streets,
         "building_info": all_building_info,
         "building_share_remarks": all_building_share_remarks,
+        "building_property_prices": all_building_property_prices,
     }
 
 
@@ -756,18 +793,27 @@ def collect_premises_data(property_hrefs: list, prop_dict: dict,
     all_premises_streets = []
     all_premises_info = []
     all_premises_share_remarks = []
+    all_property_prices = []
+    all_premises_prices = []
+    all_premises_vat = []
     total_premises_area = 0.0
 
     for prop_href in property_hrefs:
         prop_data = prop_dict.get(prop_href, {})
         share = prop_data.get("share", "")
+        is_full_share = (not share) or (share in FULL_SHARES)
+
+        # Property-level price
+        prop_price = prop_data.get("property_price_gross", "")
 
         for prem_href in prop_data.get("premises_hrefs", []):
             prem_data = premises_dict.get(prem_href, {})
             prem_id = prem_data.get("premises_id", "")
             func_raw = prem_data.get("function", "")
             prem_area = prem_data.get("area_m2", "")
-            if prem_area:
+
+            # Only sum area for full-share properties (excludes fractional garages etc.)
+            if prem_area and is_full_share:
                 try:
                     total_premises_area += float(prem_area.replace(',', '.'))
                 except ValueError:
@@ -778,28 +824,29 @@ def collect_premises_data(property_hrefs: list, prop_dict: dict,
             prem_floor = prem_data.get("floor", "")
             prem_info = prem_data.get("additional_info", "")
 
-            # Resolve premises address
+            # Resolve premises address — try addr_dict first, then inline (Poznań)
             prem_addr_href = prem_data.get("address_href", "")
-            prem_addr = format_address(addr_dict.get(prem_addr_href, {}))
+            prem_addr_data = addr_dict.get(prem_addr_href, {})
+            if not prem_addr_data:
+                prem_addr_data = prem_data.get("inline_address", {})
+            prem_addr = format_address(prem_addr_data)
+            prem_street = prem_addr_data.get("street", "")
 
             all_premises_ids.append(prem_id if prem_id else prem_href)
             all_premises_functions.append(PREMISES_FUNCTION_MAP.get(func_raw, func_raw))
             all_premises_areas.append(prem_area)
             all_premises_ancillary_areas.append(prem_anc_area)
             all_premises_rooms.append(prem_rooms)
-            # Extract street from premises address
-            prem_addr_data = addr_dict.get(prem_addr_href, {})
-            prem_street = prem_addr_data.get("street", "")
-
             all_premises_floors.append(prem_floor)
             all_premises_addresses.append(prem_addr)
             all_premises_streets.append(prem_street)
             all_premises_info.append(prem_info)
+            all_property_prices.append(prop_price)
+            all_premises_prices.append(prem_data.get("premises_price", ""))
+            all_premises_vat.append(prem_data.get("premises_vat", ""))
 
-            # Fractional share
-            is_fractional = share and share not in FULL_SHARES
-            if is_fractional:
-                all_premises_share_remarks.append(f"Sprzedaz udzialu: {share}")
+            # Always record the share value for proper ordering
+            all_premises_share_remarks.append(share if share else "1/1")
 
     return {
         "premises_ids": all_premises_ids,
@@ -812,6 +859,9 @@ def collect_premises_data(property_hrefs: list, prop_dict: dict,
         "premises_streets": all_premises_streets,
         "premises_info": all_premises_info,
         "premises_share_remarks": all_premises_share_remarks,
+        "property_prices": all_property_prices,
+        "premises_prices": all_premises_prices,
+        "premises_vat": all_premises_vat,
         "total_premises_area": total_premises_area,
     }
 
@@ -890,16 +940,61 @@ def process_transactions(root: ET.Element, ns: dict,
                 except ValueError:
                     pass
 
+            # Use premises VAT as fallback if transaction-level VAT is empty
+            vat_value = common.get("VAT", "")
+            if not vat_value:
+                prem_vats = [v for v in premdata["premises_vat"] if v]
+                if prem_vats:
+                    vat_value = SEP.join(prem_vats)
+
+            gmina = join_unique(pdata["municipalities"])
+            obreb = join_unique(pdata["precinct_names"])
+            miejscowosc = join_unique(pdata["localities"])
+            ulica = join_unique(pdata["streets"])
+            
+            # If gmina or obreb are empty (e.g. Poznań format without plots), extract from ID lokalu
+            if not gmina or not obreb:
+                inline_gminas = []
+                inline_obreby = []
+                for prem_id in premdata["premises_ids"]:
+                    if prem_id:
+                        if not gmina:
+                            inline_gminas.append(resolve_municipality(prem_id, terc_dict))
+                        if not obreb:
+                            parts = prem_id.split('.')
+                            if len(parts) >= 2:
+                                precinct_code = f"{parts[0]}.{parts[1]}"
+                                inline_obreby.append(precinct_dict.get(precinct_code, ""))
+                
+                if not gmina:
+                    gmina = join_unique(inline_gminas)
+                if not obreb:
+                    obreb = join_unique(inline_obreby)
+
+            # For Poznań: if plot-based locality/street are empty, use inline premises addresses
+            if not miejscowosc:
+                prem_addrs = [a for a in premdata["premises_addresses"] if a]
+                inline_localities = []
+                for addr_str in prem_addrs:
+                    # Extract locality from formatted address "LOCALITY, street num"
+                    parts = addr_str.split(",", 1)
+                    if parts:
+                        inline_localities.append(parts[0].strip())
+                miejscowosc = join_unique(inline_localities)
+            if not ulica:
+                ulica = join_unique(premdata["premises_streets"])
+
             row = {
                 **common,
+                "VAT": vat_value,
                 "Rodzaj nieruchomosci": join_unique(pdata["property_types"]),
                 "Rodzaj prawa": join_unique(pdata["property_rights"]),
-                "Gmina": join_unique(pdata["municipalities"]),
-                "Obręb": join_unique(pdata["precinct_names"]),
-                "Miejscowosc": join_unique(pdata["localities"]),
-                "Ulica": join_unique(pdata["streets"]),
+                "Gmina": gmina,
+                "Obręb": obreb,
+                "Miejscowosc": miejscowosc,
+                "Ulica": ulica,
                 "ID lokalu": SEP.join(premdata["premises_ids"]),
-                "Funkcja lokalu": join_unique(premdata["premises_functions"]),
+                "Funkcja lokalu": SEP.join(premdata["premises_functions"]),
                 "Pow. uzytkowa lokalu [m2]": SEP.join(premdata["premises_areas"]),
                 "Cena za m2 [PLN]": cena_m2,
                 "Pow. pom. przynal. [m2]": SEP.join(premdata["premises_ancillary_areas"]),
@@ -909,6 +1004,7 @@ def process_transactions(root: ET.Element, ns: dict,
                 "Ulica lokalu": join_unique(premdata["premises_streets"]),
                 "Info dodatkowe (lokal)": join_unique(premdata["premises_info"]),
                 "Uwagi udzialy (lokal)": SEP.join(premdata["premises_share_remarks"]),
+                "Ceny nieruchomosci": SEP.join(premdata["property_prices"]),
                 "ID dzialki": SEP.join(pdata["plot_full_ids"]),
             }
             premises_rows.append(row)
@@ -939,6 +1035,7 @@ def process_transactions(root: ET.Element, ns: dict,
                 "Ulica budynku": join_unique(bdata["building_streets"]),
                 "Info dodatkowe (budynek)": join_unique(bdata["building_info"]),
                 "Uwagi udzialy (budynek)": SEP.join(bdata["building_share_remarks"]),
+                "Ceny nieruchomosci": SEP.join(bdata["building_property_prices"]),
                 "ID dzialki": SEP.join(pdata["plot_full_ids"]),
             }
             building_rows.append(row)
@@ -959,6 +1056,7 @@ def process_transactions(root: ET.Element, ns: dict,
                 "Sposob uzytkowania": join_unique(pdata["land_uses"]),
                 "Info dodatkowe (dzialka)": join_unique(pdata["additional_info"]),
                 "Uwagi (Udzialy)": SEP.join(pdata["share_remarks"]),
+                "Ceny nieruchomosci": SEP.join(pdata["property_prices"]),
                 "ID dzialki": SEP.join(pdata["plot_full_ids"]),
             }
             plot_rows.append(row)
@@ -994,6 +1092,7 @@ PLOT_COLUMNS = [
     "Sposob uzytkowania",
     "Info dodatkowe (dzialka)",
     "Uwagi (Udzialy)",
+    "Ceny nieruchomosci",
     "VAT",
     "Oznaczenie dokumentu",
     "Tworca dokumentu",
@@ -1029,6 +1128,7 @@ BUILDING_COLUMNS = [
     "Ulica budynku",
     "Info dodatkowe (budynek)",
     "Uwagi udzialy (budynek)",
+    "Ceny nieruchomosci",
     "VAT",
     "Oznaczenie dokumentu",
     "Tworca dokumentu",
@@ -1062,6 +1162,7 @@ PREMISES_COLUMNS = [
     "Ulica lokalu",
     "Info dodatkowe (lokal)",
     "Uwagi udzialy (lokal)",
+    "Ceny nieruchomosci",
     "VAT",
     "Oznaczenie dokumentu",
     "Tworca dokumentu",
