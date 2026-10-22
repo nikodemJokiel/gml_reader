@@ -152,6 +152,194 @@ SEP = "; "
 
 
 # ============================================================================
+# OGR Flat GML Format Mappings & Constants
+# ============================================================================
+
+OGR_TRANSACTION_TYPE_MAP = {
+    "wolnyrynek": "wolny rynek",
+    "sprzedazbezprzetargowa": "sprzedaz bezprzetargowa nieruchomosci Skarbu Panstwa lub jednostek samorzadu terytorialnego",
+    "sprzedazprzetargowa": "sprzedaz przetargowa nieruchomosci Skarbu Panstwa lub jednostek samorzadu terytorialnego",
+    "sprzedazwpostepowaniuegzekucyjnym": "sprzedaz w postepowaniu egzekucyjnym",
+    "sprzedaznacelpubliczny": "sprzedaz na cel publiczny",
+    "sprzedazzbonifikata": "sprzedaz z zastosowaniem bonifikaty",
+    "sprzedazzzastosowaniembonifikaty": "sprzedaz z zastosowaniem bonifikaty",
+}
+
+OGR_PARTY_TYPE_MAP = {
+    "osobafizyczna": "osoba fizyczna",
+    "osobaprawna": "osoba prawna inna niz Skarb Panstwa i jednostka samorzadu terytorialnego",
+    "osobaprawnainnanizskarbpanstwaijednostkasamorzaduterytorialnego": "osoba prawna inna niz Skarb Panstwa i jednostka samorzadu terytorialnego",
+    "skarbpanstwa": "Skarb Panstwa",
+    "jednostkasamorzaduterytorialnego": "jednostka samorzadu terytorialnego",
+    "spoldzielniamieszkaniowa": "Spoldzielnia mieszkaniowa",
+    "inne": "Inne",
+    "inna": "Inne",
+}
+
+OGR_MARKET_TYPE_MAP = {
+    "pierwotny": "Rynek pierwotny",
+    "rynekpierwotny": "Rynek pierwotny",
+    "wtorny": "Rynek wtorny",
+    "rynekwtorny": "Rynek wtorny",
+}
+
+OGR_PROPERTY_TYPE_MAP = {
+    "nieruchomosclokalowa": "Nieruchomosc lokalowa",
+    "lokalowa": "Nieruchomosc lokalowa",
+    "nieruchomoscgruntowaniezabudowana": "Nieruchomosc gruntowa niezabudowana",
+    "gruntowaniezabudowana": "Nieruchomosc gruntowa niezabudowana",
+    "nieruchomoscgruntowazabudowana": "Nieruchomosc gruntowa zabudowana",
+    "gruntowazabudowana": "Nieruchomosc gruntowa zabudowana",
+    "nieruchomoscbudynkowa": "Nieruchomosc budynkowa",
+    "budynkowa": "Nieruchomosc budynkowa",
+}
+
+OGR_PROPERTY_RIGHT_MAP = {
+    "wlasnosclokaluwrazzprawemzwiazanym": "Wlasnosc lokalu z prawem do nieruchomosci wspolnej",
+    "wlasnosclokaluzprawemdonieruchomosciwspolnej": "Wlasnosc lokalu z prawem do nieruchomosci wspolnej",
+    "spoldzielczewlasnoscioweprawodolokalu": "Spoldzielcze wlasnosciowe prawo do lokalu",
+    "wlasnosc": "Wlasnosc nieruchomosci gruntowej",
+    "wlasnoscnieruchomoscigruntowej": "Wlasnosc nieruchomosci gruntowej",
+    "uzytkowaniewieczyste": "Uzytkowanie wieczyste",
+}
+
+OGR_LAND_USE_MAP = {
+    "gruntyzabudowaneizurbanizowane": "Grunty zabudowane i zurbanizowane",
+    "gruntyrolne": "Grunty rolne",
+    "gruntylesne": "Grunty lesne",
+    "terenykomunikacyjne": "Tereny komunikacyjne",
+    "terenyinne": "Tereny inne",
+    "gruntypodwodami": "Grunty pod wodami",
+    "nieuzytki": "Nieuzytki",
+}
+
+OGR_PREMISES_FUNCTION_MAP = {
+    "mieszkalna": "Mieszkalna",
+    "handlowouslugowa": "Handlowo-uslugowa",
+    "handlowa": "Handlowo-uslugowa",
+    "uslugowa": "Handlowo-uslugowa",
+    "garaz": "Garaz",
+    "innaniemieszkalna": "Inna niemieszkalna",
+    "inna": "Inna niemieszkalna",
+}
+
+OGR_TAG_CANDIDATES = {
+    "id_transakcji": [
+        "tran_oznaczenie_trans", "oznaczenieTransakcji", "idTransakcji",
+        "tran_lokalny_id_iip", "idIIP", "lokalnyId", "tran_id"
+    ],
+    "rodzaj_trans": [
+        "tran_rodzaj_trans", "rodzajTransakcji", "rodzaj_transakcji"
+    ],
+    "rodzaj_rynku": [
+        "tran_rodzaj_rynku", "rodzajRynku", "rodzaj_rynku"
+    ],
+    "sprzedajacy": [
+        "tran_sprzedajacy", "stronaSprzedajaca", "strona_sprzedajaca"
+    ],
+    "kupujacy": [
+        "tran_kupujacy", "stronaKupujaca", "strona_kupujaca"
+    ],
+    "cena_brutto": [
+        "tran_cena_brutto", "cenaTransakcjiBrutto", "cena_brutto", "cenaTransakcji"
+    ],
+    "vat": [
+        "tran_vat", "kwotaPodatkuVAT", "stawkaPodatkuVAT", "stawkaVAT", "vat", "podatekVAT", "kwotaVAT"
+    ],
+    "dok_oznaczenie": [
+        "dok_oznaczenie", "oznaczenieDokumentu", "oznaczenie_dokumentu", "sygnatura"
+    ],
+    "dok_data": [
+        "dok_data", "dataZawarciaTransakcji", "dataDokumentu", "dataSporzadzeniaDokumentu", "dataTransakcji", "dataZawarciaUmowy"
+    ],
+    "dok_tworca": [
+        "dok_tworca", "tworcaDokumentu", "tworca_dokumentu", "notariusz"
+    ],
+    "nier_rodzaj": [
+        "nier_rodzaj", "rodzajNieruchomosci", "rodzaj_nieruchomosci"
+    ],
+    "nier_prawo": [
+        "nier_prawo", "rodzajPrawaDoNieruchomosci", "rodzajPrawa", "rodzaj_prawa"
+    ],
+    "nier_udzial": [
+        "nier_udzial", "udzialWPrawie", "udzial"
+    ],
+    "nier_pow_gruntu": [
+        "nier_pow_gruntu", "powierzchniaGruntu"
+    ],
+    "nier_cena_brutto": [
+        "nier_cena_brutto", "cenaNieruchomosci", "cenaNieruchomosciBrutto"
+    ],
+    "nier_vat": [
+        "nier_vat", "vatNieruchomosci"
+    ],
+    "nier_opis": [
+        "nier_opis", "opisNieruchomosci", "opis", "dodatkoweInformacje"
+    ],
+    "dzi_id": [
+        "dzi_id_dzialki", "idDzialki", "id_dzialki"
+    ],
+    "dzi_nr": [
+        "dzi_nr_dzialki", "numerDzialki", "numer_dzialki", "nrDzialki"
+    ],
+    "dzi_pow": [
+        "dzi_pow_ewid", "poleEwidencyjne", "powierzchniaDzialki", "powEwidencyjna"
+    ],
+    "dzi_sposob_uzyt": [
+        "dzi_sposob_uzyt", "sposobUzytkowania", "sposob_uzytkowania"
+    ],
+    "dzi_przezn_wmpzp": [
+        "dzi_przezn_wmpzp", "przeznaczenieWMPZP", "przeznaczenie"
+    ],
+    "dzi_cena": [
+        "dzi_cena_brutto", "cenaDzialki"
+    ],
+    "dzi_vat": [
+        "dzi_vat"
+    ],
+    "dzi_info": [
+        "dzi_info", "informacjeDzialka", "infoDzialka"
+    ],
+    "dzi_adres": [
+        "dzi_adres", "adresDzialki", "adres"
+    ],
+    "lok_id": [
+        "lok_id_lokalu", "idLokalu", "id_lokalu"
+    ],
+    "lok_funkcja": [
+        "lok_funkcja", "funkcjaLokalu", "funkcja_lokalu"
+    ],
+    "lok_pow_uzyt": [
+        "lok_pow_uzyt", "powierzchniaUzytkowaLokalu", "powUzytkowa", "pow_uzytkowa"
+    ],
+    "lok_pow_przyn": [
+        "lok_pow_przyn", "powierzchniaPomieszczenPrzynaleznych", "powPrzynalezna"
+    ],
+    "lok_liczba_izb": [
+        "lok_liczba_izb", "liczbaIzb", "liczba_izb"
+    ],
+    "lok_nr_kond": [
+        "lok_nr_kond", "numerKondygnacji", "kondygnacja"
+    ],
+    "lok_adres": [
+        "lok_adres", "adresLokalu"
+    ],
+    "lok_cena": [
+        "lok_cena_brutto", "cenaLokalu"
+    ],
+    "lok_vat": [
+        "lok_vat"
+    ],
+    "lok_info": [
+        "lok_info", "informacjeLokal", "infoLokal"
+    ],
+    "teryt": [
+        "teryt", "kodTeryt", "kod_teryt"
+    ]
+}
+
+
+# ============================================================================
 # TERC dictionary builder
 # ============================================================================
 
@@ -282,6 +470,8 @@ def detect_namespaces(gml_path: str) -> dict:
             ns["gml"] = uri
         elif "xlink" in uri_lower:
             ns["xlink"] = uri
+        elif "ogr" in uri_lower or prefix == "ogr":
+            ns["ogr"] = uri
 
     # Fallback by prefix name
     if "rcn" not in ns:
@@ -302,10 +492,17 @@ def detect_namespaces(gml_path: str) -> dict:
                 ns["xlink"] = uri
                 break
 
+    if "ogr" not in ns:
+        for prefix, uri in raw_namespaces.items():
+            if prefix == "ogr":
+                ns["ogr"] = uri
+                break
+
     ns.setdefault("gml", "http://www.opengis.net/gml/3.2")
     ns.setdefault("xlink", "http://www.w3.org/1999/xlink")
 
     return ns
+
 
 
 def get_text(element: ET.Element, tag: str, ns: dict) -> str:
@@ -351,9 +548,11 @@ def extract_plot_number(plot_id: str) -> str:
 def hectares_to_sqm(value_ha: str) -> int | None:
     """Convert hectares to square meters. Returns rounded int or None."""
     try:
-        return round(float(value_ha) * 10000)
-    except (ValueError, TypeError):
+        val = float(str(value_ha).replace(",", ".").replace(" ", ""))
+        return round(val * 10000)
+    except (ValueError, TypeError, AttributeError):
         return None
+
 
 
 def safe_float(value: str) -> float | None:
@@ -393,6 +592,127 @@ def format_address(addr_data: dict) -> str:
         parts.append(number)
 
     return ", ".join(parts)
+
+
+def normalize_key(s: str) -> str:
+    """Normalize string to lowercase alphanumeric characters only."""
+    return re.sub(r"[^a-zA-Z0-9]", "", s).lower() if s else ""
+
+
+def map_ogr_value(val: str, map_dict: dict, fallback_map: dict | None = None) -> str:
+    """Map string using normalized key lookup, with optional numeric code fallback."""
+    if not val:
+        return ""
+    norm = normalize_key(val)
+    if norm in map_dict:
+        return map_dict[norm]
+    if fallback_map and val in fallback_map:
+        return fallback_map[val]
+    return val
+
+
+def get_elem_field(elem: ET.Element, candidate_names: list[str]) -> str:
+    """Search child elements of elem for any tag whose local name matches candidate_names, skipping xsi:nil."""
+    candidates_lower = {c.lower() for c in candidate_names}
+    for child in elem:
+        local_name = child.tag.split("}")[-1].lower() if "}" in child.tag else child.tag.lower()
+        if local_name in candidates_lower:
+            nil_attr = child.get("{http://www.w3.org/2001/XMLSchema-instance}nil", "")
+            if nil_attr.lower() in ("true", "1"):
+                continue
+            if child.text:
+                return child.text.strip()
+    return ""
+
+
+def parse_ogr_address(addr_str: str) -> dict:
+    """
+    Parse OGR address string (e.g. 'MSC:X;UL:Y;NR_PORZ:Z|MSC:...').
+    Returns dict with lists: localities, streets, formatted_addresses, street_numbers.
+    """
+    localities = []
+    streets = []
+    formatted_addresses = []
+    street_numbers = []
+
+    if not addr_str:
+        return {
+            "localities": localities,
+            "streets": streets,
+            "formatted_addresses": formatted_addresses,
+            "street_numbers": street_numbers,
+        }
+
+    parts = addr_str.split("|")
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue
+
+        loc = ""
+        ul = ""
+        nr = ""
+        lok = ""
+
+        if ":" in part:
+            pairs = part.split(";")
+            for p in pairs:
+                p = p.strip()
+                if ":" in p:
+                    k, v = p.split(":", 1)
+                    k = k.strip().upper()
+                    v = v.strip()
+                    if k in ("MSC", "MIEJSCOWOSC", "MIASTO", "WIES"):
+                        loc = v
+                    elif k in ("UL", "ULICA"):
+                        ul = v
+                    elif k in ("NR_PORZ", "NR", "NUMER", "NR_BUD"):
+                        nr = v
+                    elif k in ("NR_LOK", "LOK", "LOKAL"):
+                        lok = v
+        else:
+            formatted_addresses.append(part)
+            continue
+
+        if loc and loc not in localities:
+            localities.append(loc)
+        if ul and ul not in streets:
+            streets.append(ul)
+
+        full_nr = nr
+        if lok:
+            full_nr = f"{nr}/{lok}" if nr else lok
+        if full_nr and full_nr not in street_numbers:
+            street_numbers.append(full_nr)
+
+        formatted = format_address({"locality": loc, "street": ul, "number": full_nr})
+        if formatted and formatted not in formatted_addresses:
+            formatted_addresses.append(formatted)
+
+    return {
+        "localities": localities,
+        "streets": streets,
+        "formatted_addresses": formatted_addresses,
+        "street_numbers": street_numbers,
+    }
+
+
+def is_ogr_format(ns: dict, root: ET.Element | None = None) -> bool:
+    """Return True if the file uses OGR flat format instead of relational RCiWN format."""
+    if "rcn" in ns:
+        return False
+    if "ogr" in ns:
+        return True
+    if root is not None:
+        root_tag = root.tag.lower()
+        if "ogr" in root_tag:
+            return True
+        for elem in root.iter():
+            tag = elem.tag.lower()
+            if any(t in tag for t in ("transakcje_dzialki", "transakcje_lokale", "transakcje_budynki")):
+                return True
+    return False
+
 
 
 # ============================================================================
@@ -1081,6 +1401,404 @@ def process_transactions(root: ET.Element, ns: dict,
 
 
 # ============================================================================
+# OGR Transaction Processing (Flat GML)
+# ============================================================================
+
+def process_ogr_transactions(root: ET.Element, ns: dict,
+                             terc_dict: dict, precinct_dict: dict) -> tuple[list, list, list]:
+    """
+    Process flat OGR format GML files (e.g. from geoportal exports).
+    Groups features by transaction ID and sorts into 3 lists:
+      - plot_rows:     transactions with plots only
+      - building_rows: transactions with buildings
+      - premises_rows: transactions with premises or marked as nieruchomoscLokalowa
+    """
+    plot_rows = []
+    building_rows = []
+    premises_rows = []
+
+    # 1. Collect all feature elements
+    features = []
+    for elem in root.iter():
+        local_tag = elem.tag.split("}")[-1].lower() if "}" in elem.tag else elem.tag.lower()
+        if "transakcj" in local_tag or "transakcja" in local_tag:
+            if "lokal" in local_tag:
+                cat = "lokale"
+            elif "budyn" in local_tag:
+                cat = "budynki"
+            elif "dzialk" in local_tag or "grunt" in local_tag:
+                cat = "dzialki"
+            else:
+                cat = "dzialki"
+            features.append((cat, elem))
+
+    # 2. Group by transaction ID
+    transactions = {}
+    for cat, elem in features:
+        tran_id = get_elem_field(elem, OGR_TAG_CANDIDATES["id_transakcji"])
+        if not tran_id:
+            tran_id = elem.attrib.get(f"{{{ns.get('gml', '')}}}id") or elem.attrib.get("id") or str(len(transactions))
+        group_key = tran_id.replace("-", "").upper()
+        if group_key not in transactions:
+            transactions[group_key] = {"features": [], "id": tran_id}
+        transactions[group_key]["features"].append((cat, elem))
+
+    # 3. Process each grouped transaction
+    global_lp = 1
+    for group_key, gdata in transactions.items():
+        feat_list = gdata["features"]
+
+        tran_id_display = gdata["id"]
+        tran_type_raw = ""
+        market_type_raw = ""
+        seller_raw = ""
+        buyer_raw = ""
+        price_raw = ""
+        vat_raw = ""
+        doc_ozn = ""
+        doc_date = ""
+        doc_creator = ""
+        teryt_code = ""
+
+        prop_types_raw = []
+        prop_rights_raw = []
+        prop_shares = []
+        prop_prices = []
+        prop_descriptions = []
+        prop_land_areas = []
+
+        plot_numbers = []
+        plot_ids = []
+        plot_areas_sqm = []
+        plot_uses_raw = []
+        plot_mpzp = []
+        plot_infos = []
+        plot_localities = []
+        plot_streets = []
+        plot_addresses = []
+        plot_municipalities = []
+        plot_precinct_names = []
+
+        lok_ids = []
+        lok_funcs_raw = []
+        lok_areas = []
+        lok_ancillary_areas = []
+        lok_rooms = []
+        lok_floors = []
+        lok_addresses = []
+        lok_streets = []
+        lok_infos = []
+        lok_prices = []
+        lok_vats = []
+        lok_localities = []
+        lok_municipalities = []
+        lok_precinct_names = []
+
+        bld_ids = []
+        bld_types_raw = []
+        bld_areas = []
+        bld_addresses = []
+        bld_streets = []
+        bld_infos = []
+
+        # Iterate elements in group
+        for cat, elem in feat_list:
+            if not tran_id_display:
+                tran_id_display = get_elem_field(elem, OGR_TAG_CANDIDATES["id_transakcji"])
+            if not tran_type_raw:
+                tran_type_raw = get_elem_field(elem, OGR_TAG_CANDIDATES["rodzaj_trans"])
+            if not market_type_raw:
+                market_type_raw = get_elem_field(elem, OGR_TAG_CANDIDATES["rodzaj_rynku"])
+            if not seller_raw:
+                seller_raw = get_elem_field(elem, OGR_TAG_CANDIDATES["sprzedajacy"])
+            if not buyer_raw:
+                buyer_raw = get_elem_field(elem, OGR_TAG_CANDIDATES["kupujacy"])
+            if not price_raw:
+                price_raw = get_elem_field(elem, OGR_TAG_CANDIDATES["cena_brutto"])
+            if not vat_raw:
+                vat_raw = get_elem_field(elem, OGR_TAG_CANDIDATES["vat"])
+            if not doc_ozn:
+                doc_ozn = get_elem_field(elem, OGR_TAG_CANDIDATES["dok_oznaczenie"])
+            if not doc_date:
+                doc_date = get_elem_field(elem, OGR_TAG_CANDIDATES["dok_data"])
+            if not doc_creator:
+                doc_creator = get_elem_field(elem, OGR_TAG_CANDIDATES["dok_tworca"])
+            if not teryt_code:
+                teryt_code = get_elem_field(elem, OGR_TAG_CANDIDATES["teryt"])
+
+            # Property fields
+            ptype = get_elem_field(elem, OGR_TAG_CANDIDATES["nier_rodzaj"])
+            if ptype and ptype not in prop_types_raw:
+                prop_types_raw.append(ptype)
+            pright = get_elem_field(elem, OGR_TAG_CANDIDATES["nier_prawo"])
+            if pright and pright not in prop_rights_raw:
+                prop_rights_raw.append(pright)
+            share = get_elem_field(elem, OGR_TAG_CANDIDATES["nier_udzial"])
+            if share:
+                prop_shares.append(share)
+            pprice = get_elem_field(elem, OGR_TAG_CANDIDATES["nier_cena_brutto"])
+            if pprice:
+                prop_prices.append(pprice)
+            pdesc = get_elem_field(elem, OGR_TAG_CANDIDATES["nier_opis"])
+            if pdesc and pdesc not in prop_descriptions:
+                prop_descriptions.append(pdesc)
+            pgrun = get_elem_field(elem, OGR_TAG_CANDIDATES["nier_pow_gruntu"])
+            if pgrun:
+                prop_land_areas.append(pgrun)
+
+            # Plots
+            dzi_id = get_elem_field(elem, OGR_TAG_CANDIDATES["dzi_id"])
+            if dzi_id or cat == "dzialki":
+                if dzi_id:
+                    if dzi_id not in plot_ids:
+                        plot_ids.append(dzi_id)
+                        dzi_nr = get_elem_field(elem, OGR_TAG_CANDIDATES["dzi_nr"])
+                        if not dzi_nr:
+                            dzi_nr = extract_plot_number(dzi_id)
+                        plot_numbers.append(dzi_nr)
+
+                        # resolve gmina & obreb
+                        gmi = resolve_municipality(dzi_id, terc_dict)
+                        if gmi and gmi not in plot_municipalities:
+                            plot_municipalities.append(gmi)
+                        parts = dzi_id.split(".")
+                        if len(parts) >= 2:
+                            code = f"{parts[0]}.{parts[1]}"
+                            obr = precinct_dict.get(code, "")
+                            if obr and obr not in plot_precinct_names:
+                                plot_precinct_names.append(obr)
+
+                pow_ha = get_elem_field(elem, OGR_TAG_CANDIDATES["dzi_pow"])
+                if pow_ha:
+                    sqm = hectares_to_sqm(pow_ha)
+                    if sqm is not None:
+                        plot_areas_sqm.append(sqm)
+
+                addr_str = get_elem_field(elem, OGR_TAG_CANDIDATES["dzi_adres"])
+                if addr_str:
+                    parsed_addr = parse_ogr_address(addr_str)
+                    plot_localities.extend(parsed_addr["localities"])
+                    plot_streets.extend(parsed_addr["streets"])
+                    plot_addresses.extend(parsed_addr["formatted_addresses"])
+
+                use = get_elem_field(elem, OGR_TAG_CANDIDATES["dzi_sposob_uzyt"])
+                if use and use not in plot_uses_raw:
+                    plot_uses_raw.append(use)
+                mpzp = get_elem_field(elem, OGR_TAG_CANDIDATES["dzi_przezn_wmpzp"])
+                if mpzp and mpzp not in plot_mpzp:
+                    plot_mpzp.append(mpzp)
+                info = get_elem_field(elem, OGR_TAG_CANDIDATES["dzi_info"])
+                if info and info not in plot_infos:
+                    plot_infos.append(info)
+
+            # Premises
+            lok_id = get_elem_field(elem, OGR_TAG_CANDIDATES["lok_id"])
+            lok_pow = get_elem_field(elem, OGR_TAG_CANDIDATES["lok_pow_uzyt"])
+            if lok_id or lok_pow or cat == "lokale":
+                if lok_id:
+                    if lok_id not in lok_ids:
+                        lok_ids.append(lok_id)
+                        gmi = resolve_municipality(lok_id, terc_dict)
+                        if gmi and gmi not in lok_municipalities:
+                            lok_municipalities.append(gmi)
+                        parts = lok_id.split(".")
+                        if len(parts) >= 2:
+                            code = f"{parts[0]}.{parts[1]}"
+                            obr = precinct_dict.get(code, "")
+                            if obr and obr not in lok_precinct_names:
+                                lok_precinct_names.append(obr)
+
+                func = get_elem_field(elem, OGR_TAG_CANDIDATES["lok_funkcja"])
+                if func:
+                    mapped_func = map_ogr_value(func, OGR_PREMISES_FUNCTION_MAP, PREMISES_FUNCTION_MAP)
+                    lok_funcs_raw.append(mapped_func)
+                if lok_pow:
+                    lok_areas.append(lok_pow)
+                anc = get_elem_field(elem, OGR_TAG_CANDIDATES["lok_pow_przyn"])
+                if anc:
+                    lok_ancillary_areas.append(anc)
+                izb = get_elem_field(elem, OGR_TAG_CANDIDATES["lok_liczba_izb"])
+                if izb:
+                    lok_rooms.append(izb)
+                kond = get_elem_field(elem, OGR_TAG_CANDIDATES["lok_nr_kond"])
+                if kond:
+                    lok_floors.append(kond)
+
+                lok_addr_str = get_elem_field(elem, OGR_TAG_CANDIDATES["lok_adres"])
+                if lok_addr_str:
+                    parsed_addr = parse_ogr_address(lok_addr_str)
+                    lok_localities.extend(parsed_addr["localities"])
+                    lok_streets.extend(parsed_addr["streets"])
+                    lok_addresses.extend(parsed_addr["formatted_addresses"])
+
+                linfo = get_elem_field(elem, OGR_TAG_CANDIDATES["lok_info"])
+                if linfo and linfo not in lok_infos:
+                    lok_infos.append(linfo)
+                lcena = get_elem_field(elem, OGR_TAG_CANDIDATES["lok_cena"])
+                if lcena:
+                    lok_prices.append(lcena)
+                lvat = get_elem_field(elem, OGR_TAG_CANDIDATES["lok_vat"])
+                if lvat:
+                    lok_vats.append(lvat)
+
+        # Fallbacks for Gmina / Obręb / Miejscowość / Ulica
+        gmina = join_unique(plot_municipalities or lok_municipalities)
+        obreb = join_unique(plot_precinct_names or lok_precinct_names)
+        miejscowosc = join_unique(plot_localities or lok_localities)
+        ulica = join_unique(plot_streets or lok_streets)
+
+        if not gmina and teryt_code and miejscowosc:
+            msc_upper = miejscowosc.upper()
+            for t_key, t_val in terc_dict.items():
+                if t_key.startswith(teryt_code) and msc_upper in t_val.upper():
+                    gmina = t_val
+                    break
+
+        if not obreb and miejscowosc:
+            msc_upper = miejscowosc.upper()
+            for p_code, p_name in precinct_dict.items():
+                if p_name.upper() == msc_upper:
+                    obreb = p_name
+                    break
+
+        # Final price and VAT
+        price = price_raw
+        if not price and prop_prices:
+            price = str(int(sum(safe_float(p) or 0 for p in prop_prices)))
+        elif not price and lok_prices:
+            price = str(int(sum(safe_float(p) or 0 for p in lok_prices)))
+
+        vat = vat_raw
+        if not vat and lok_vats:
+            vat = SEP.join(lok_vats)
+
+        # Common dict
+        common = {
+            "Lp.": global_lp,
+            "Skrocone ID": tran_id_display[:9] if tran_id_display else "",
+            "ID transakcji": tran_id_display,
+            "Data transakcji": doc_date,
+            "Rodzaj transakcji": map_ogr_value(tran_type_raw, OGR_TRANSACTION_TYPE_MAP, TRANSACTION_TYPE_MAP),
+            "Rodzaj rynku": map_ogr_value(market_type_raw, OGR_MARKET_TYPE_MAP, MARKET_TYPE_MAP),
+            "Strona kupujaca": map_ogr_value(buyer_raw, OGR_PARTY_TYPE_MAP, PARTY_TYPE_MAP),
+            "Strona sprzedajaca": map_ogr_value(seller_raw, OGR_PARTY_TYPE_MAP, PARTY_TYPE_MAP),
+            "Cena [PLN]": price,
+            "VAT": vat,
+            "Oznaczenie dokumentu": doc_ozn,
+            "Tworca dokumentu": doc_creator,
+        }
+        global_lp += 1
+
+        # Check sheet category
+        has_lokale = (
+            len(lok_ids) > 0 or len(lok_areas) > 0 or
+            any("lokal" in p.lower() for p in prop_types_raw) or
+            any(cat == "lokale" for cat, _ in feat_list)
+        )
+        has_budynki = (
+            len(bld_ids) > 0 or
+            any("budyn" in p.lower() for p in prop_types_raw) or
+            any(cat == "budynki" for cat, _ in feat_list)
+        )
+
+        mapped_ptypes = [map_ogr_value(p, OGR_PROPERTY_TYPE_MAP, PROPERTY_TYPE_MAP) for p in prop_types_raw]
+        mapped_prights = [map_ogr_value(p, OGR_PROPERTY_RIGHT_MAP, PROPERTY_RIGHT_MAP) for p in prop_rights_raw]
+
+        if has_lokale:
+            # Lokale sheet
+            total_lok_area = sum(safe_float(a) or 0 for a in lok_areas)
+            cena_m2 = ""
+            if common["Cena [PLN]"] and total_lok_area > 0:
+                p_flt = safe_float(common["Cena [PLN]"])
+                if p_flt:
+                    cena_m2 = round(p_flt / total_lok_area, 2)
+
+            prop_type_val = join_unique(mapped_ptypes) if mapped_ptypes else "Nieruchomosc lokalowa"
+
+            row = {
+                **common,
+                "Rodzaj nieruchomosci": prop_type_val,
+                "Rodzaj prawa": join_unique(mapped_prights),
+                "Gmina": gmina,
+                "Obręb": obreb,
+                "Miejscowosc": miejscowosc,
+                "Ulica": ulica,
+                "ID lokalu": SEP.join(lok_ids),
+                "Funkcja lokalu": SEP.join(lok_funcs_raw),
+                "Pow. uzytkowa lokalu [m2]": SEP.join(lok_areas),
+                "Cena za m2 [PLN]": cena_m2,
+                "Pow. pom. przynal. [m2]": SEP.join(lok_ancillary_areas),
+                "Liczba izb": SEP.join(lok_rooms),
+                "Nr kondygnacji": SEP.join(lok_floors),
+                "Adres lokalu": SEP.join(lok_addresses or plot_addresses),
+                "Ulica lokalu": join_unique(lok_streets or plot_streets),
+                "Info dodatkowe (lokal)": join_unique(lok_infos + prop_descriptions),
+                "Uwagi udzialy (lokal)": SEP.join(prop_shares) if prop_shares else "",
+                "Ceny nieruchomosci": SEP.join(prop_prices) if prop_prices else (SEP.join(lok_prices) if lok_prices else ""),
+                "ID dzialki": SEP.join(plot_ids),
+            }
+            premises_rows.append(row)
+
+        elif has_budynki:
+            # Budynki sheet
+            row = {
+                **common,
+                "Rodzaj nieruchomosci": join_unique(mapped_ptypes) if mapped_ptypes else "Nieruchomosc budynkowa",
+                "Rodzaj prawa": join_unique(mapped_prights),
+                "Gmina": gmina,
+                "Obręb": obreb,
+                "Miejscowosc": miejscowosc,
+                "Ulica": ulica,
+                "Numer dzialki": SEP.join(plot_numbers),
+                "Pow. dzialki [m2]": sum(plot_areas_sqm) if plot_areas_sqm else None,
+                "Przeznaczenie (MPZP)": join_unique(plot_mpzp),
+                "Sposob uzytkowania": join_unique([map_ogr_value(u, OGR_LAND_USE_MAP, LAND_USE_MAP) for u in plot_uses_raw]),
+                "Info dodatkowe (dzialka)": join_unique(plot_infos + prop_descriptions),
+                "Uwagi udzialy (dzialka)": SEP.join(prop_shares) if prop_shares else "",
+                "ID budynku": SEP.join(bld_ids),
+                "Rodzaj budynku": join_unique(bld_types_raw),
+                "Pow. uzytkowa budynku [m2]": SEP.join(bld_areas),
+                "Adres budynku": SEP.join(bld_addresses),
+                "Ulica budynku": join_unique(bld_streets),
+                "Info dodatkowe (budynek)": join_unique(bld_infos),
+                "Uwagi udzialy (budynek)": "",
+                "Ceny nieruchomosci": SEP.join(prop_prices),
+                "ID dzialki": SEP.join(plot_ids),
+            }
+            building_rows.append(row)
+
+        else:
+            # Dzialki sheet
+            total_sqm = sum(plot_areas_sqm) if plot_areas_sqm else None
+            if total_sqm is None and prop_land_areas:
+                grun_sqm = [hectares_to_sqm(g) for g in prop_land_areas if hectares_to_sqm(g) is not None]
+                if grun_sqm:
+                    total_sqm = sum(grun_sqm)
+
+            row = {
+                **common,
+                "Rodzaj nieruchomosci": join_unique(mapped_ptypes) if mapped_ptypes else "Nieruchomosc gruntowa niezabudowana",
+                "Rodzaj prawa": join_unique(mapped_prights),
+                "Gmina": gmina,
+                "Obręb": obreb,
+                "Miejscowosc": miejscowosc,
+                "Ulica": ulica,
+                "Numer dzialki": SEP.join(plot_numbers),
+                "Powierzchnia [m2]": total_sqm,
+                "Przeznaczenie (MPZP)": join_unique(plot_mpzp),
+                "Sposob uzytkowania": join_unique([map_ogr_value(u, OGR_LAND_USE_MAP, LAND_USE_MAP) for u in plot_uses_raw]),
+                "Info dodatkowe (dzialka)": join_unique(plot_infos + prop_descriptions),
+                "Uwagi (Udzialy)": SEP.join(prop_shares) if prop_shares else "",
+                "Ceny nieruchomosci": SEP.join(prop_prices),
+                "ID dzialki": SEP.join(plot_ids),
+            }
+            plot_rows.append(row)
+
+    return plot_rows, building_rows, premises_rows
+
+
+
+# ============================================================================
 # Excel export
 # ============================================================================
 
@@ -1197,6 +1915,7 @@ def prepare_sheet_df(rows: list[dict], column_order: list[str],
         return pd.DataFrame(columns=column_order)
 
     df = pd.DataFrame(rows)
+    df["Lp."] = range(1, len(df) + 1)
 
     # Type conversions for area if present
     if area_col in df.columns:
@@ -1343,6 +2062,30 @@ def main():
     print("   Detecting XML namespaces...")
     ns = detect_namespaces(gml_path)
 
+    # --- Step 2: Parse XML tree ---
+    print("   Loading XML tree...")
+    tree = ET.parse(gml_path)
+    root = tree.getroot()
+
+    # --- Check for OGR flat format ---
+    if is_ogr_format(ns, root):
+        print("   Detected OGR flat GML format.")
+        print("   Processing OGR transactions...")
+        plot_rows, building_rows, premises_rows = process_ogr_transactions(
+            root, ns, terc_dict, precinct_dict
+        )
+        total = len(plot_rows) + len(building_rows) + len(premises_rows)
+        print(f"     -> {total} transactions total")
+        print(f"        Dzialki:  {len(plot_rows)}")
+        print(f"        Budynki:  {len(building_rows)}")
+        print(f"        Lokale:   {len(premises_rows)}")
+
+        # --- Step 5: Export to Excel ---
+        print(f"   Exporting to: {output_name}")
+        export_to_excel(plot_rows, building_rows, premises_rows, output_name)
+        print("[DONE] Finished.")
+        return
+
     if "rcn" not in ns:
         print("[ERROR] Could not find an RCiWN namespace (rcn/rcwn) in the file.")
         print(f"   Detected namespaces: {ns}")
@@ -1350,10 +2093,6 @@ def main():
 
     print(f"   Namespaces: rcn={ns.get('rcn', '?')}")
 
-    # --- Step 2: Parse XML tree ---
-    print("   Loading XML tree...")
-    tree = ET.parse(gml_path)
-    root = tree.getroot()
 
     # --- Step 3: Build reference lookup dictionaries ---
     print("   Building document dictionary...")

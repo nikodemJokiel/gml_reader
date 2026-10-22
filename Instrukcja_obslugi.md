@@ -50,10 +50,14 @@ Kiedy masz już zainstalowanego Pythona oraz biblioteki, konwertowanie plików w
 4. **Wynik:**
    Program utworzy plik Excel o **tej samej nazwie** co plik GML (np. `moje_dane.xlsx`).
    
+   Program automatycznie rozpoznaje format pliku GML:
+   - **Format relacyjny RCiWN (GUGiK)** — klasyczny format wymiany danych RCiWN.
+   - **Format płaski OGR / Geoportal** — eksporty z serwisów geoportalowych (np. warstwy `transakcje_dzialki`, `transakcje_lokale`).
+   
    Plik Excel zawiera **3 arkusze**:
-   - **Działki** — transakcje dotyczące wyłącznie działek (bez budynków i lokali)
+   - **Działki** — transakcje dotyczące działek (bez lokali)
    - **Budynki** — transakcje z budynkami (ale bez lokali)
-   - **Lokale** — transakcje z lokalami (nawet jeśli w transakcji jest też budynek)
+   - **Lokale** — transakcje z lokalami (oraz transakcje nieruchomości lokalowych)
 
 ---
 
