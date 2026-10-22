@@ -35,7 +35,7 @@ Program potrzebuje kilku paczek danych (np. do obsługi plików Excel), które m
 Kiedy masz już zainstalowanego Pythona oraz biblioteki, konwertowanie plików wygląda następująco:
 
 1. **Przygotowanie plików:** 
-   Przekopiuj pobrany plik GML (np. `moje_dane.gml`) do folderu `gml_reader`. W tym samym folderze powinien znajdować się plik `TERC.xml` (odpowiada za nazwy gmin).
+   Przekopiuj pobrany plik GML (np. `moje_dane.gml`) do folderu `gml_reader`. W tym samym folderze powinien znajdować się plik `TERC.xml` (odpowiada za nazwy gmin) oraz opcjonalnie `Obreby.dbf` (odpowiada za nazwy obrębów).
 
 2. **Otwieranie wiersza poleceń (cmd):**
    Wejdź do folderu `gml_reader`. Kliknij w górny pasek adresu, wpisz **`cmd`** i wciśnij **Enter**.
@@ -70,3 +70,7 @@ Kiedy masz już zainstalowanego Pythona oraz biblioteki, konwertowanie plików w
 * **Brak polskich nazw gmin / puste miejsca**
   **Przyczyna:** Brak pliku `TERC.xml` w folderze `gml_reader`.
   **Rozwiązanie:** Upewnij się, że plik `TERC.xml` leży dokładnie obok pliku `gml_reader.py`. Jeśli go nie będzie, program zadziała, ale w tabeli wypisze surowe kody TERYT.
+
+* **Brak nazw obrębów / puste miejsca w kolumnie Obręb**
+  **Przyczyna:** Brak pliku `Obreby.dbf` (lub `Obręby.dbf`) w folderze `gml_reader`.
+  **Rozwiązanie:** Umieść plik `Obreby.dbf` w folderze ze skryptem. Jeśli pliku nie ma, kolumny z obrębem pozostaną puste.

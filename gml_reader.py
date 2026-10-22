@@ -13,12 +13,12 @@ Generates an Excel file with 3 sheets:
   - Lokale:  transactions with premises (even if buildings present too)
 
 Optionally reads TERC.xml (auto-detected) to resolve TERYT codes to names.
+Optionally reads Obreby.dbf (auto-detected) to resolve precinct codes to names.
 
-Required libraries: pandas, openpyxl
 Required libraries: pandas, openpyxl, dbfread
 Usage: python gml_reader.py <file.gml>
        Output file name matches the input file name with .xlsx extension.
-       TERC.xml is auto-detected next to the GML file or in the working directory.
+       TERC.xml and Obreby.dbf are auto-detected next to the GML file or in the working directory.
 """
 
 import sys
@@ -203,21 +203,37 @@ def build_terc_dict(terc_path: str) -> dict:
 def build_precinct_dict(dbf_path: str) -> dict:
     """
     Load DBF file and map JPT_KOD_JE to JPT_NAZWA_
+    Supports multiple encodings (utf-8, cp1250, iso-8859-2) common in Polish GIS data.
     """
     precinct_dict = {}
     if not os.path.exists(dbf_path):
         print(f"[!] Warning: {dbf_path} not found. Precinct names will be empty.")
         return precinct_dict
 
-    try:
-        db = dbfread.DBF(dbf_path, encoding='utf-8')
-        for row in db:
-            code = str(row.get('JPT_KOD_JE', '')).strip()
-            name = str(row.get('JPT_NAZWA_', '')).strip()
-            if code and name:
-                precinct_dict[code] = name
-    except Exception as e:
-        print(f"[!] Error reading {dbf_path}: {e}")
+    # Try common encodings
+    for enc in ('utf-8', 'cp1250', 'iso-8859-2'):
+        try:
+            db = dbfread.DBF(dbf_path, encoding=enc)
+            for row in db:
+                code = str(row.get('JPT_KOD_JE', '')).strip()
+                name = str(row.get('JPT_NAZWA_', '')).strip()
+                if code and name:
+                    precinct_dict[code] = name
+            if precinct_dict:
+                break
+        except Exception:
+            continue
+
+    if not precinct_dict:
+        try:
+            db = dbfread.DBF(dbf_path, encoding='cp1250', char_decode_errors='ignore')
+            for row in db:
+                code = str(row.get('JPT_KOD_JE', '')).strip()
+                name = str(row.get('JPT_NAZWA_', '')).strip()
+                if code and name:
+                    precinct_dict[code] = name
+        except Exception as e:
+            print(f"[!] Error reading {dbf_path}: {e}")
 
     return precinct_dict
 
@@ -260,7 +276,7 @@ def detect_namespaces(gml_path: str) -> dict:
 
     for prefix, uri in raw_namespaces.items():
         uri_lower = uri.lower()
-        if "rcn" in uri_lower or "rcwn" in uri_lower or "rciwn" in uri_lower or "cenwartosci" in uri_lower:
+        if any(term in uri_lower for term in ("rcn", "rcwn", "rciwn", "rcw", "cenwartosci", "ceniwartosci")):
             ns["rcn"] = uri
         elif "opengis.net/gml" in uri_lower:
             ns["gml"] = uri
@@ -270,7 +286,7 @@ def detect_namespaces(gml_path: str) -> dict:
     # Fallback by prefix name
     if "rcn" not in ns:
         for prefix, uri in raw_namespaces.items():
-            if prefix in ("rcn", "rcwn"):
+            if prefix in ("rcn", "rcwn", "rcw", "rciwn"):
                 ns["rcn"] = uri
                 break
 
@@ -1302,9 +1318,26 @@ def main():
     else:
         print("   [INFO] TERC.xml not found -- using raw TERYT codes")
 
-    print("   Loading Precinct dictionary from: Obręby.dbf")
-    precinct_dict = build_precinct_dict("Obręby.dbf")
-    print(f"     -> Loaded {len(precinct_dict)} precinct entries")
+    # Auto-detect Obreby.dbf (or Obręby.dbf) next to the GML file or in the current directory
+    dbf_path = None
+    dbf_candidates = [
+        Path(gml_path).parent / "Obreby.dbf",
+        Path("Obreby.dbf"),
+        Path(gml_path).parent / "Obręby.dbf",
+        Path("Obręby.dbf"),
+    ]
+    for candidate in dbf_candidates:
+        if candidate.is_file():
+            dbf_path = str(candidate)
+            break
+
+    precinct_dict = {}
+    if dbf_path:
+        print(f"   Loading Precinct dictionary from: {dbf_path}")
+        precinct_dict = build_precinct_dict(dbf_path)
+        print(f"     -> Loaded {len(precinct_dict)} precinct entries")
+    else:
+        print("   [INFO] Obreby.dbf not found -- precinct names will be empty")
 
     # --- Step 1: Detect XML namespaces ---
     print("   Detecting XML namespaces...")
